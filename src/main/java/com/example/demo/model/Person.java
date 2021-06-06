@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
@@ -8,21 +10,22 @@ import java.util.UUID;
 
 @Document(collection = "personCol")
 public class Person {
-    private UUID id;
+
+    @Transient
+    public static final String SEQUENCE_NAME = "users_sequence";
+
+    @Id
+    private int id;
 
     @NotBlank
     private String name;
 
-    public Person(@JsonProperty("id") UUID id,@JsonProperty("name") String name) {
-        this.id = id;
-        this.name = name;
-    }
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 

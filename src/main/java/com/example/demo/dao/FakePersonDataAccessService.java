@@ -2,7 +2,9 @@ package com.example.demo.dao;
 
 import com.example.demo.model.Person;
 import com.example.demo.repo.PersonRepository;
+import com.example.demo.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -19,10 +21,10 @@ public class FakePersonDataAccessService implements PersonDao {
     List<Person> DB = new ArrayList<>();
 
     @Override
-    public int insertPerson(UUID id, Person person) {
-        personRepository.save(new Person(id,person.getName()));
+    public int insertPerson( Person person) {
+        personRepository.save(person);
 //        DB.add(new Person(id,person.getName()));
-        return 1;
+        return person.getId();
     }
 
     @Override
@@ -32,31 +34,31 @@ public class FakePersonDataAccessService implements PersonDao {
 
 
     @Override
-    public Optional<Person> selectPersonById(UUID id) {
-        return DB.stream()
-                .filter(person -> person.getId().equals(id))
-                .findAny();
+    public Optional<Person> selectPersonById(int id) {
+        return personRepository.findById(id);
     }
 
     @Override
-    public int deletePeronById(UUID id) {
-        Optional<Person> personPresentOrNot = selectPersonById(id);
-        if(personPresentOrNot.isEmpty()){
-            return 0;
-        }
-        DB.remove(personPresentOrNot.get());
-        return 1;
+    public int deletePeronById(int id) {
+        personRepository.deleteById(id);
+        return id;
     }
 
     @Override
-    public int updatePersonById(UUID idUpdate, Person personUpdate) {
-        return selectPersonById(idUpdate).map(person -> {
-            int indexOfPersonToUpdate = DB.indexOf(person);
-            if(indexOfPersonToUpdate >= 0){
-                DB.set(indexOfPersonToUpdate,new Person(idUpdate,personUpdate.getName()));
-                return 1;
-            }
-            return 0;
-        }).orElse(0);
+    public ResponseEntity < Person > updatePersonById(int id, Person personUpdate) {
+        Person person = personRepository.findById(id)
+                .orElse(personUpdate);
+
+        person.setName(personUpdate.getName());
+        final Person updatedEmployee = personRepository.save(person);
+        return ResponseEntity.ok(updatedEmployee);
+//        return selectPersonById(idUpdate).map(person -> {
+//            int indexOfPersonToUpdate = DB.indexOf(person);
+//            if(indexOfPersonToUpdate >= 0){
+//                DB.set(indexOfPersonToUpdate,new Person(idUpdate,personUpdate.getName()));
+//                return 1;
+//            }
+//            return 0;
+//        }).orElse(0);
     }
 }
