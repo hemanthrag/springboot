@@ -1,13 +1,18 @@
 package com.example.demo.api;
 
+import com.example.demo.model.DeleteMessage;
 import com.example.demo.model.Person;
 import com.example.demo.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +27,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public int addPerson(@Valid @NotNull @RequestBody Person person){
+    public Person addPerson(@Valid @NotNull @RequestBody Person person){
         return personService.addPerson(person);
     }
 
@@ -32,13 +37,24 @@ public class PersonController {
     }
 
     @GetMapping(path = "/getuser/{id}")
-    public Person selectPersonById(@PathVariable("id") int id){
-        return personService.selectPersonById(id).orElse(null);
+    public Person selectPersonById(@PathVariable("id") int id) {
+        return personService.selectPersonById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id not found"));
     }
 
     @DeleteMapping(path = "/deleteUser/{id}")
-    public void deletePersonById(@PathVariable("id") int id){
-        personService.deletePersonById(id);
+    public DeleteMessage deletePersonById(@PathVariable("id") int id){
+//        if(selectPersonById(id) != null){
+//            personService.deletePersonById(id);
+//            DeleteMessage deleteMessage = new DeleteMessage();
+//            deleteMessage.setId(id);
+//            deleteMessage.setMessage("Deleted Successfully");
+//            return deleteMessage;
+//        }else {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id not found");
+//        }
+        return personService.deletePersonById(id);
+
+
     }
 
     @PutMapping(path = "/updateUser/{id}")

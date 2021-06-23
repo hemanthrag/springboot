@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dao.PersonDao;
 import com.example.demo.model.DatabaseSequence;
+import com.example.demo.model.DeleteMessage;
 import com.example.demo.model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,9 +10,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.xml.crypto.Data;
 import java.util.List;
@@ -33,7 +36,7 @@ public class PersonService {
         this.personDao = personDao;
     }
 
-    public int addPerson(Person person){
+    public Person addPerson(Person person){
         person.setId(getSequenceNumber(Person.SEQUENCE_NAME));
         return personDao.addPerson(person);
     }
@@ -46,8 +49,17 @@ public class PersonService {
         return personDao.selectPersonById(id);
     }
 
-    public int deletePersonById(int id){
-        return personDao.deletePeronById(id);
+    public DeleteMessage deletePersonById(int id){
+        if(selectPersonById(id).isPresent()){
+            personDao.deletePeronById(id);
+            DeleteMessage deleteMessage = new DeleteMessage();
+            deleteMessage.setId(id);
+            deleteMessage.setMessage("Deleted Successfully");
+            return deleteMessage;
+        }else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delete Id not found");
+        }
+//        return personDao.deletePeronById(id);
     }
 
     public ResponseEntity< Person > updatePerson(int id, Person person){

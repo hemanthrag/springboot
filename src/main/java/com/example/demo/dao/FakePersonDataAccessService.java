@@ -4,8 +4,10 @@ import com.example.demo.model.Person;
 import com.example.demo.repo.PersonRepository;
 import com.example.demo.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +20,11 @@ public class FakePersonDataAccessService implements PersonDao {
     @Autowired
     PersonRepository personRepository;
 
-    List<Person> DB = new ArrayList<>();
-
     @Override
-    public int insertPerson( Person person) {
+    public Person insertPerson( Person person) {
         personRepository.save(person);
 //        DB.add(new Person(id,person.getName()));
-        return person.getId();
+        return person;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class FakePersonDataAccessService implements PersonDao {
     @Override
     public ResponseEntity < Person > updatePersonById(int id, Person personUpdate) {
         Person person = personRepository.findById(id)
-                .orElse(personUpdate);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id not found"));
 
         person.setName(personUpdate.getName());
         final Person updatedEmployee = personRepository.save(person);

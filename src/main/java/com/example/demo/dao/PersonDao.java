@@ -8,9 +8,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PersonDao {
-    int insertPerson( Person person);
+    Person insertPerson( Person person);
 
-    default int addPerson(Person person){
+    default Person addPerson(Person person){
         return insertPerson(person);
     }
 
